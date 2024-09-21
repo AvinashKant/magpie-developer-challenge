@@ -24,7 +24,7 @@ class Product
         /**
          * Travel all pagination links and parse the products from each page
          */
-        $pages = $this->getPages($productsDivs, $this->rawData->getBaseHref());
+        $pages = ScrapeHelper::getPages($productsDivs, $this->rawData->getBaseHref());
 
         if (is_array($pages) && count($pages) > 0) {
             foreach ($pages as $page) {
@@ -34,16 +34,6 @@ class Product
         }
 
         return $this->products;
-
-    }
-
-    public function getPages(Crawler $documentNode, string $baseUri): array
-    {
-        $pages = $documentNode->filter('#pages a')->each(function (Crawler $node, $i) use ($baseUri) {
-            $param = explode('?', $node->attr('href'));
-            return (!$node->matches('.active')) ? $baseUri . '?' . $param[1] : "";
-        });
-        return array_diff($pages, [null]);
     }
 
     private function parse(Crawler $document)
@@ -69,6 +59,9 @@ class Product
         });
     }
 
+    /**
+     * Create a structured array from the product data
+     */
     private function createStructure(string $title, $capacity, string $imageUrl, $price, string $availability, string $shippingText, string $color): array
     {
         $availability = explode(":", $availability);
