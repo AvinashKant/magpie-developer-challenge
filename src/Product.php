@@ -42,20 +42,32 @@ class Product implements ParserInterface
     /**
      * Create a structured array from the product data
      */
-    private function createStructure(string $title, $capacity, string $imageUrl, $price, string $availability, string $shippingText, string $color): array
+    private function createStructure(string $title, string $capacity, string $imageUrl, $price, string $availability, string $shippingText, string $color): array
     {
         $availability = explode(":", $availability);
         return [
             "title" => $title,
             "price" => $price,
             "imageUrl" => $imageUrl,
-            "capacityMB" => $capacity,
+            "capacityMB" => $this->changeCapacityToMB($capacity),
             "colour" => $color,
             "availabilityText" => $availability[1] ?? null,
             "isAvailable" => $this->isStockAvailable($availability[1] ?? null),
             "shippingText" => $shippingText,
             "shippingDate" => $this->extractDateFromText($shippingText),
         ];
+    }
+
+    private function changeCapacityToMB(string $capacity): string
+    {
+        if ((strpos(strtolower($capacity), 'gb') === false)) {
+            return intval($capacity);
+        }
+
+        /**
+         * Return value in MB
+         */
+        return intval($capacity) * 1000;
     }
 
     private function isStockAvailable(string $availability): bool
