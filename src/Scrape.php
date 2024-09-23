@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\ParserInterface;
+use App\ProductParser;
 use App\Product;
 
 require 'vendor/autoload.php';
@@ -13,7 +13,7 @@ class Scrape
 
     private $parser;
 
-    public function __construct(ParserInterface $parser)
+    public function __construct(ProductParser $parser)
     {
         $this->parser = $parser;
     }
@@ -45,6 +45,6 @@ class Scrape
 
 }
 
-$products = new Product;
-$scrape = new Scrape($products);
+$productParser = new Product();
+$scrape = new Scrape($productParser);
 $scrape->run();

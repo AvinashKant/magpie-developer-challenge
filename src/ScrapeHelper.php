@@ -25,4 +25,28 @@ class ScrapeHelper
         return array_diff($pages, [null]);
     }
 
+    public static function extractDateFromText($text)
+    {
+        /**
+         * Regular expression to match various date formats
+         */
+        $regex = '/\d{4}-\d{2}-\d{2}|\d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}/';
+
+        /**
+         * Find all matches in the text
+         */
+        preg_match_all($regex, $text, $matches);
+
+        /**
+         * If matches found, return the first match (assuming the first date is the most relevant)
+         */
+        if (!empty($matches[0])) {
+            return $matches[0][0];
+        }
+        /**
+         * If no matches found, return null or an appropriate error message
+         */
+        return null;
+    }
+
 }

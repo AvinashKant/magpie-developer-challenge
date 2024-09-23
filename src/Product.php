@@ -4,11 +4,8 @@ namespace App;
 
 use Symfony\Component\DomCrawler\Crawler;
 
-class Product implements ParserInterface
+class Product extends ProductParser
 {
-    public function __construct()
-    {
-    }
 
     /**
      * Parse the products from the document
@@ -54,7 +51,7 @@ class Product implements ParserInterface
             "availabilityText" => $availability[1] ?? null,
             "isAvailable" => $this->isStockAvailable($availability[1] ?? null),
             "shippingText" => $shippingText,
-            "shippingDate" => $this->extractDateFromText($shippingText),
+            "shippingDate" => ScrapeHelper::extractDateFromText($shippingText),
         ];
     }
 
@@ -75,27 +72,5 @@ class Product implements ParserInterface
         return (strpos(strtolower($availability), 'out of stock') === false);
     }
 
-    private function extractDateFromText($text)
-    {
-        /**
-         * Regular expression to match various date formats
-         */
-        $regex = '/\d{4}-\d{2}-\d{2}|\d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}/';
-
-        /**
-         * Find all matches in the text
-         */
-        preg_match_all($regex, $text, $matches);
-
-        /**
-         * If matches found, return the first match (assuming the first date is the most relevant)
-         */
-        if (!empty($matches[0])) {
-            return $matches[0][0];
-        }
-        /**
-         * If no matches found, return null or an appropriate error message
-         */
-        return null;
-    }
+    
 }
