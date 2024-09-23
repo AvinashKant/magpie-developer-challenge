@@ -4,44 +4,22 @@ namespace App;
 
 use Symfony\Component\DomCrawler\Crawler;
 
-class Product
+class Product implements ParserInterface
 {
-
-    private Crawler $rawData;
-
-    private array $products = [];
-
-    public function __construct(Crawler $document)
+    public function __construct()
     {
-        $this->rawData = $document;
     }
 
-    public function process(): array
+    /**
+     * Parse the products from the document
+     */
+    public function parse(Crawler $document): array
     {
-        $productsDivs = $this->rawData->filter('body > div.container > div#products')->eq(0);
-        $this->parse($productsDivs);
-
-        /**
-         * Travel all pagination links and parse the products from each page
-         */
-        $pages = ScrapeHelper::getPages($productsDivs, $this->rawData->getBaseHref());
-
-        if (is_array($pages) && count($pages) > 0) {
-            foreach ($pages as $page) {
-                $document = ScrapeHelper::fetchDocument($page);
-                $this->parse($document->filter('body > div.container > div#products')->eq(0));
-            }
-        }
-
-        return $this->products;
-    }
-
-    private function parse(Crawler $document)
-    {
-        $document->filter('div.product')->each(function (Crawler $node, $i) {
+        $products = [];
+        $document->filter('div.product')->each(function (Crawler $node, $i) use (&$products) {
             $childDivs = $node->filter('div')->children('div > div');
 
-            $childDivs->eq(0)->filter('div > span')->each(function (Crawler $colorDiv, $i) use ($node, $childDivs) {
+            $childDivs->eq(0)->filter('div > span')->each(function (Crawler $colorDiv, $i) use ($node, $childDivs, &$products) {
 
                 $title = $node->filter('h3 > span.product-name')->eq(0)->text();
                 $capacity = $node->filter('h3 > span.product-capacity')->eq(0)->text();
@@ -53,10 +31,12 @@ class Product
                 $availability = $childDivs->eq(2)->text();
                 $shippingText = $childDivs->eq(3)->text();
 
-                $this->products[] = $this->createStructure($title, $capacity, $imageUrl, $price, $availability, $shippingText, $color);
+                $products[] = $this->createStructure($title, $capacity, $imageUrl, $price, $availability, $shippingText, $color);
 
             });
+
         });
+        return $products;
     }
 
     /**
